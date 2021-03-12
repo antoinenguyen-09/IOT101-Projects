@@ -1,6 +1,8 @@
 // include the library code:
 #include <LiquidCrystal.h>
 #include <IRremote.h>
+#include <stdbool.h>
+
 // initialize the library by associating any needed LCD interface pin
 // with the arduino pin number it is connected to
 const int RECV_PIN = 7;
@@ -11,51 +13,9 @@ decode_results results;
 const int rs = 12, en = 11, d4 = 5, d5 = 4, d6 = 3, d7 = 2;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 unsigned long key_value = 0;
-const unsigned int TRIG_PIN=9;
-const unsigned int ECHO_PIN=10;
-const unsigned int BAUD_RATE=9600;
-int NUM_ROWS = 2;
-int NUM_COLUMNS = 16;
-
-enum Buttons {
-  NONE,
-  BUTTON_1,
-  BUTTON_2,
-  BUTTON_3,
-  BUTTON_4,
-  BUTTON_5,
-  BUTTON_6,
-  BUTTON_7,
-  BUTTON_8,
-  BUTTON_9,
-  BUTTON_NEXT,
-  BUTTON_PREV,
-  BUTTON_CLEAR
-};
-struct code_button_pair {
-  unsigned long code;
-  int button;
-};
-int button = NONE;
-int cycle = 0;
-
-int row = 0;
-int column = 0;
-const code_button_pair code_mapping[] {
-  {0xFF30CF,BUTTON_1},
-  { 0xFF18E7, BUTTON_2 },
-  { 0xFF7A85, BUTTON_3 },
-  { 0xFF10EF, BUTTON_4 },
-  { 0xFF38C7, BUTTON_5 },
-  { 0xFF5AA5, BUTTON_6 },
-  { 0xFF42BD, BUTTON_7 },
-  { 0xFF4AB5, BUTTON_8 },
-  { 0xFF52AD, BUTTON_9 },
-  { 0xFF906F, BUTTON_NEXT },
-  { 0xFFE01F, BUTTON_PREV },
-  { 0xFFA25D, BUTTON_CLEAR }
-};
-
+const unsigned int TRIG_PIN = 9;
+const unsigned int ECHO_PIN = 10;
+const unsigned int BAUD_RATE = 9600;
 
 #define NOTE_B0  31
 #define NOTE_C1  33
@@ -156,168 +116,241 @@ void setup() {
   pinMode(TRIG_PIN, OUTPUT);
   pinMode(ECHO_PIN, INPUT);
   pinMode(8, OUTPUT);
- pinMode(6, OUTPUT);
- lcd.cursor();
+  pinMode(6, OUTPUT);
+  lcd.cursor();
 }
-void updateState() {
-  int code_mapping_size = sizeof(code_mapping) / sizeof(code_button_pair);
-  for (int i = 0; i < code_mapping_size; ++i) {
-    if (results.value == code_mapping[i].code) {
-      if (button == code_mapping[i].button) {
-        if (button != BUTTON_7 && button != BUTTON_9) {
-          cycle = (cycle + 1) % 3;
-        } else {
-          cycle = (cycle + 1) % 4;
+
+void print_input_digit(int value, int count)
+{
+  lcd.setCursor(count - 1, 0);
+  lcd.print(value);
+}
+
+int input_number(String command)
+{
+  int num[2] = {0, 0};
+  int count, number, value;
+  while(true)
+  {   
+    alert();
+    count = 11, number = 0, value = -1;
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print(command);
+    //Input number
+    while(true)
+    { 
+      if(alert()){
+        lcd.setCursor(0, 0);
+        lcd.print(command);
+        num[0]=0;
+        num[1]=0;
+        count=11;
+        number=0;
+      };
+      
+      if(irrecv.decode(&results))
+      {
+        Serial.println(results.value, HEX);
+        if(results.value == 0xFF6897) //0 
+        {
+          value = 0;
+          ++count;
+          if(count-11 <= 2)
+          {
+            print_input_digit(value, count);
+            num[count-11 - 1] = value;
+          }
         }
-      } else {
-        button = code_mapping[i].button;
-        cycle = 0;
+        else if(results.value == 0xFF30CF) //1
+        {
+          value = 1;
+          ++count;
+          if(count-11 <= 2)
+          {
+            print_input_digit(value, count);
+            num[count -11- 1] = value;
+          }
+        }
+        else if(results.value == 0xFF18E7) //2
+        {
+          value = 2;
+          ++count;
+          if(count-11 <= 2)
+          {
+            print_input_digit(value, count);
+            num[count -11- 1] = value;
+          }
+        }
+        else if(results.value == 0xFF7A85) //3
+        {
+          value = 3;
+          ++count;
+          if(count-11 <= 2)
+          {
+            print_input_digit(value, count);
+            num[count -11- 1] = value;
+          }
+        }
+        else if(results.value == 0xFF10EF) //4
+        {
+          value = 4;
+          ++count;
+          if(count-11 <= 2)
+          {
+            print_input_digit(value, count);
+            num[count -11- 1] = value;
+          }
+        }
+        else if(results.value == 0xFF38C7) //5
+        {
+          value = 5;
+          ++count;
+          if(count-11 <= 2)
+          {
+            print_input_digit(value, count);
+            num[count -11- 1] = value;
+          }
+        }
+        else if(results.value == 0xFF5AA5) //6
+        {
+          value = 6;
+          ++count;
+          if(count-11 <= 2)
+          {
+            print_input_digit(value, count);
+            num[count -11- 1] = value;
+          }
+        }
+        else if(results.value == 0xFF42BD) //7
+        {
+          value = 7;
+          ++count;
+          if(count-11 <= 2)
+          {
+            print_input_digit(value, count);
+            num[count -11- 1] = value;
+          }
+        }
+        else if(results.value == 0xFF4AB5) //8
+        {
+          value = 8;
+          ++count;
+          if(count -11<= 2)
+          {
+            print_input_digit(value, count);
+            num[count -11- 1] = value;
+          }
+        }
+        else if(results.value == 0xFF52AD) //9
+        {
+          value = 9;
+          ++count;
+          if(count-11 <= 2)
+          {
+            print_input_digit(value, count);
+            num[count -11- 1] = value;
+          }
+        }
+        else if(results.value == 0xFFA857) //enter
+        {
+          irrecv.resume();
+          lcd.clear();
+          break;
+        }
+        irrecv.resume();
       }
     }
+    if(count-11 == 0)
+    {
+      lcd.clear();
+      lcd.setCursor(0, 0);
+      lcd.print("No code");
+      delay(1000);
+      continue;
+    }
+    else if(count-11 >= 2)
+    {
+      number = num[0] * 10 + num[1];
+    }
+//    Serial.println(number);
+    //Validate the input number
+    break;
   }
+  return number;
 }
 
-int mod(int a, int b) {
-    int r = a % b;
-    return r < 0 ? r + b : r;
-}
-void decodeState() {
-  switch (button) {
-     case BUTTON_1:
-      lcd.print((char)('1' + cycle));
-      break;
-    case BUTTON_2:
-      lcd.print((char)('2' + cycle));
-      break;
-    case BUTTON_3:
-      lcd.print((char)('3' + cycle)); 
-      break;
-    case BUTTON_4:
-      lcd.print((char)('4' + cycle));
-      break;
-    case BUTTON_5:
-      lcd.print((char)('5' + cycle));
-      break;
-    case BUTTON_6:
-      lcd.print((char)('6' + cycle));
-      break;
-    case BUTTON_7:
-      lcd.print((char)('7' + cycle));
-      break;
-    case BUTTON_8:
-      lcd.print((char)('8' + cycle));
-      break;
-    case BUTTON_9:
-      lcd.print((char)('9' + cycle));
-      break;
-    case BUTTON_NEXT:
-      column = mod((column + 1), NUM_COLUMNS);
-      if (column == 0) 
-        row = mod((row + 1), NUM_ROWS);
-      break;
-    case BUTTON_PREV:
-      column = mod((column - 1), NUM_COLUMNS);
-      if (column == 15) 
-        row = mod((row - 1), NUM_ROWS);
-      break;
-    case BUTTON_CLEAR:
-      lcd.print(' ');
-      break;
-    default:
-      break;
-  }
-  lcd.setCursor(column, row);
-}
-
-void loop() {
-
-  // set the display to automatically scroll:
-lcd.noAutoscroll();
-  
+bool alert() {
   digitalWrite(TRIG_PIN, LOW);
   delayMicroseconds(2);
   digitalWrite(TRIG_PIN, HIGH);
   delayMicroseconds(10);
   digitalWrite(TRIG_PIN, LOW);
 
- unsigned long duration= pulseIn(ECHO_PIN, HIGH);
- int distance= duration/29/2;
- if(duration==0){
-      lcd.println("no pulse");
-      lcd.clear();
-   } 
-  else if(distance<=5){
-    digitalWrite(6, HIGH);   
+  unsigned long duration = pulseIn(ECHO_PIN, HIGH);
+  int distance = duration / 29 / 2;
+  if (duration == 0) {
+    lcd.println("no pulse");
+    lcd.clear();
+    return false;
+  }
+  else if (distance <= 5) {
+    digitalWrite(6, HIGH);
     int melody[] = {
 
-  NOTE_C4, NOTE_G3, NOTE_G3, NOTE_A3, NOTE_G3, 0, NOTE_B3, NOTE_C4
-};
+      NOTE_C4, NOTE_G3, NOTE_G3, NOTE_A3, NOTE_G3, 0, NOTE_B3, NOTE_C4
+    };
 
-// note durations: 4 = quarter note, 8 = eighth note, etc.:
-int noteDurations[] = {
+    // note durations: 4 = quarter note, 8 = eighth note, etc.:
+    int noteDurations[] = {
 
-  4, 8, 8, 4, 4, 4, 4, 4
-};
-   
-     for (int thisNote = 0; thisNote < 8; thisNote++) {
+      4, 8, 8, 4, 4, 4, 4, 4
+    };
 
-    // to calculate the note duration, take one second divided by the note type.
+    for (int thisNote = 0; thisNote < 8; thisNote++) {
 
-    //e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
+      int noteDuration = 1000 / noteDurations[thisNote];
 
-    int noteDuration = 1000 / noteDurations[thisNote];
+      tone(8, melody[thisNote], noteDuration);
 
-    tone(8, melody[thisNote], noteDuration);
+      int pauseBetweenNotes = noteDuration * 1.30;
 
-    // to distinguish the notes, set a minimum time between them.
+      delay(pauseBetweenNotes);
 
-    // the note's duration + 30% seems to work well:
+      // stop the tone playing:
 
-    int pauseBetweenNotes = noteDuration * 1.30;
-
-    delay(pauseBetweenNotes);
-
-    // stop the tone playing:
-
-    noTone(8);
-          lcd.clear();
-      lcd.print("distance:");
-      lcd.print(distance);
-      lcd.print("cm");
-
-  } 
-          delay(3000);
+      noTone(8);
       lcd.clear();
-  }
-  digitalWrite(6, LOW);
-  
-  int stop=-1; // > 0 nhap so vao
-  
-  key_value=results.value;
-  if(irrecv.decode(&results)){
-    if (key_value == 0xFF22DD ){ // == TEST
-      Serial.println(stop);
-      lcd.print("Enter Code:");
-      stop=1;
-      irrecv.resume();
-    }  
-  }
-  
-  while(stop>0){  //fix lai
-  if (irrecv.decode(&results)) {
-
-    updateState();
-    decodeState();
-    irrecv.resume();
+      lcd.print("STAY AWAY!");
     }
-        if (results.value==0xFFA25D ){
-     
-      lcd.clear();
-      irrecv.resume();
-      Serial.println(stop);
-       stop=-1;
-      }
+    delay(3000);
+    lcd.clear();
+    digitalWrite(6, LOW);
+    return true;
   }
-  Serial.println(stop);
+}
+void loop() {
+
+  // set the display to automatically scroll:
+  lcd.noAutoscroll();
+  alert();
+  int Min=0,Max=50;
+  int code = input_number("Enter code:");
+  if(code < Min || code > Max)
+    {
+      lcd.clear();
+      lcd.setCursor(0, 0);
+      lcd.print("Wrong Code!");
+      delay(2000);
+    }
+    else{
+      lcd.print("PLACE ");
+      lcd.print(code);
+      lcd.print(" SUCCESS");
+      delay(1000);
+    }
+
+  alert();
+  irrecv.resume();
   delay(100);
-  }            // bat lai ko dc
+}
